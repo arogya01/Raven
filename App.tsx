@@ -19,7 +19,6 @@ const backgroundService = async () => {
         body: string;
         timestamp: number;
       }) => {
-        // const deviceName = await DeviceInfo.getDeviceName();
         console.log('recieved message in background service', {
           message: message,
         });
@@ -44,29 +43,50 @@ const options = {
     name: 'ic_launcher',
     type: 'mipmap',
   },
+  notification: {
+    channelId: 'sms-reader',
+    channelName: 'SMS Reader Service',
+    importance: 3, // HIGH
+    title: 'SMS Reader Active',
+    message: 'Reading SMS messages in background',
+    // Required for Android 14
+    foregroundServiceType: 'dataSync',
+  },
 };
 
 const Stack = createNativeStackNavigator();
 
 async function requestSmsPermissions() {
   try {
-    const granted = await PermissionsAndroid.requestMultiple([
-      PermissionsAndroid.PERMISSIONS.RECEIVE_SMS,
+    const permissions = [
       PermissionsAndroid.PERMISSIONS.READ_SMS,
-    ]);
-    console.log('grated', granted);
-    if (
-      granted[PermissionsAndroid.PERMISSIONS.RECEIVE_SMS] ===
-        PermissionsAndroid.RESULTS.GRANTED &&
-      granted[PermissionsAndroid.PERMISSIONS.READ_SMS] ===
-        PermissionsAndroid.RESULTS.GRANTED
-    ) {
-      console.log('You can receive and read SMS messages');
-      return true;
-    } else {
-      console.log('SMS permissions denied');
+      PermissionsAndroid.PERMISSIONS.SEND_SMS,
+      PermissionsAndroid.PERMISSIONS.RECEIVE_SMS,
+      PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+    ];
+
+    // Filter out any null/undefined permissions
+    const validPermissions = permissions.filter(
+      permission => permission != null,
+    );
+
+    if (validPermissions.length === 0) {
+      console.error('No valid permissions to request');
       return false;
     }
+
+    // Request permissions with error handling
+    const results = await PermissionsAndroid.requestMultiple(validPermissions);
+
+    // Log results for debugging
+    console.log('Permission results:', results);
+
+    // Check if all permissions were granted
+    const allGranted = Object.values(results).every(
+      result => result === PermissionsAndroid.RESULTS.GRANTED,
+    );
+
+    return allGranted;
   } catch (err) {
     console.warn(err);
     return false;
