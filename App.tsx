@@ -22,7 +22,7 @@ const backgroundService = async () => {
         console.log('recieved message in background service', {
           message: message,
         });
-        // await sendSmsToServer(message);
+        await sendSmsToServer(message);
       },
     );
 
