@@ -6,7 +6,8 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import ReadScreen from './modules/ReadScreen';
 import HomeScreen from './modules/HomeScreen';
 import {PermissionsAndroid} from 'react-native';
-import {sendSmsToServer} from './services';
+import {sendSmsToServer} from './src/services';
+import {notificationOptions} from './src/utils';
 
 const backgroundService = async () => {
   console.log('running background service');
@@ -33,25 +34,6 @@ const backgroundService = async () => {
       resolve();
     });
   });
-};
-
-const options = {
-  taskName: 'SMS Background Service',
-  taskTitle: 'SMS Background Service is running',
-  taskDesc: 'Listening for incoming SMS and sending to server',
-  taskIcon: {
-    name: 'ic_launcher',
-    type: 'mipmap',
-  },
-  notification: {
-    channelId: 'sms-reader',
-    channelName: 'SMS Reader Service',
-    importance: 3, // HIGH
-    title: 'SMS Reader Active',
-    message: 'Reading SMS messages in background',
-    // Required for Android 14
-    foregroundServiceType: 'dataSync',
-  },
 };
 
 const Stack = createNativeStackNavigator();
@@ -98,7 +80,7 @@ function App(): React.JSX.Element {
     const checkPermits = async () => {
       const granted = await requestSmsPermissions();
       if (granted) {
-        BackgroundService.start(backgroundService, options);
+        BackgroundService.start(backgroundService, notificationOptions);
       }
     };
 

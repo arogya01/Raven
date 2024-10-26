@@ -1,8 +1,8 @@
 import React from 'react';
 import {ScrollView, StatusBar, StyleSheet, useColorScheme} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import SmsSection from '../src/SmsSection';
-import {Colors} from '../colors';
+import SmsSection from '../src/components/SmsSection';
+import {Colors} from '../src/colors';
 
 function HomeScreen({navigation}: {navigation: unknown}) {
   const isDarkMode = useColorScheme() === 'dark';
