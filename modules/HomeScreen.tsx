@@ -2,10 +2,9 @@ import React from 'react';
 import {ScrollView, StatusBar, StyleSheet, useColorScheme} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import SmsSection from '../src/SmsSection';
-import SyncButton from '../src/SyncButton';
 import {Colors} from '../colors';
 
-function HomeScreen({navigation}) {
+function HomeScreen({navigation}: {navigation: unknown}) {
   const isDarkMode = useColorScheme() === 'dark';
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
@@ -21,13 +20,7 @@ function HomeScreen({navigation}) {
         contentInsetAdjustmentBehavior="automatic"
         style={[backgroundStyle, styles.scrollView]}
         contentContainerStyle={styles.scrollViewContent}>
-        <SmsSection title="Sms Sync Engine">
-          <SyncButton title="Sync Messages to the server" />
-          <SyncButton
-            onPress={() => navigation.navigate('ReadMessage')}
-            title="Read Messages from the Server"
-          />
-        </SmsSection>
+        <SmsSection title="Sms Sync Engine" navigation={navigation} />
       </ScrollView>
     </SafeAreaView>
   );

@@ -1,14 +1,11 @@
 import {PropsWithChildren, useEffect, useState} from 'react';
-import {
-  PermissionsAndroid,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+import React from 'react';
+import {StyleSheet, Text, useColorScheme, View} from 'react-native';
 import SmsAndroid from 'react-native-get-sms-android';
 import {SmsMessageType} from '../types';
 import {Colors} from '../colors';
+import SyncButton from './SyncButton';
+import {sendSmsToServer} from '../services';
 
 /* List SMS messages matching the filter */
 var filter = {
@@ -20,9 +17,10 @@ var filter = {
 
 type SectionProps = PropsWithChildren<{
   title: string;
+  navigation: any;
 }>;
 
-function SmsSection({children, title}: SectionProps): React.JSX.Element {
+function SmsSection({navigation, title}: SectionProps): React.JSX.Element {
   const [smsList, setSmsList] = useState([]);
   useEffect(() => {
     console.log('requesting sms permission');
@@ -49,7 +47,14 @@ function SmsSection({children, title}: SectionProps): React.JSX.Element {
   }, []);
 
   console.log('smsList: ', smsList);
+
   const isDarkMode = useColorScheme() === 'dark';
+
+  const syncMessages = async () => {
+    console.log('syncing messages');
+    await sendSmsToServer(smsList);
+  };
+
   return (
     <View style={styles.sectionContainer}>
       <Text
@@ -61,7 +66,16 @@ function SmsSection({children, title}: SectionProps): React.JSX.Element {
         ]}>
         {title}
       </Text>
-      <View style={styles.sectionChildCtn}>{children}</View>
+      <View style={styles.sectionChildCtn}>
+        <SyncButton
+          onPress={syncMessages}
+          title="Sync Messages to the server"
+        />
+        <SyncButton
+          onPress={() => navigation.navigate('ReadMessage')}
+          title="Read Messages from the Server"
+        />
+      </View>
     </View>
   );
 }
