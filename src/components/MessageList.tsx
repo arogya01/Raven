@@ -1,5 +1,6 @@
 import {StyleSheet, View} from 'react-native';
 import {Colors} from '../colors';
+import {Message} from '../types';
 
 type MessageListProps = {
   messages: Message[];

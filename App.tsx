@@ -5,9 +5,14 @@ import SmsListener from 'react-native-android-sms-listener';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import ReadScreen from './modules/ReadScreen';
 import HomeScreen from './modules/HomeScreen';
-import {PermissionsAndroid} from 'react-native';
+import {PermissionsAndroid, Platform, Alert} from 'react-native';
 import {sendSmsToServer} from './src/services';
 import {notificationOptions} from './src/utils';
+import IntentLauncher from 'react-native-intent-launcher';
+
+if (__DEV__) {
+  import('./reactotron.config.ts');
+}
 
 const backgroundService = async () => {
   console.log('running background service');
@@ -40,35 +45,60 @@ const Stack = createNativeStackNavigator();
 
 async function requestSmsPermissions() {
   try {
-    const permissions = [
+    // Separate SMS permissions from notification permission
+    const smsPermissions = [
       PermissionsAndroid.PERMISSIONS.READ_SMS,
       PermissionsAndroid.PERMISSIONS.SEND_SMS,
       PermissionsAndroid.PERMISSIONS.RECEIVE_SMS,
-      PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
     ];
 
-    // Filter out any null/undefined permissions
-    const validPermissions = permissions.filter(
-      permission => permission != null,
-    );
+    // Request SMS permissions first
+    const smsResults = await PermissionsAndroid.requestMultiple(smsPermissions);
 
-    if (validPermissions.length === 0) {
-      console.error('No valid permissions to request');
-      return false;
-    }
-
-    // Request permissions with error handling
-    const results = await PermissionsAndroid.requestMultiple(validPermissions);
-
-    // Log results for debugging
-    console.log('Permission results:', results);
-
-    // Check if all permissions were granted
-    const allGranted = Object.values(results).every(
+    // Check SMS permissions
+    const smssGranted = Object.values(smsResults).every(
       result => result === PermissionsAndroid.RESULTS.GRANTED,
     );
 
-    return allGranted;
+    // Handle notification permission separately
+    let notificationGranted = false;
+    if (Platform.Version >= 33) {
+      // Android 13 or higher
+      const notificationStatus = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+      );
+
+      if (notificationStatus === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
+        // Show alert to direct user to settings
+        Alert.alert(
+          'Notification Permission Required',
+          'Please enable notifications in settings to receive updates.',
+          [
+            {
+              text: 'Open Settings',
+              onPress: () => {
+                IntentLauncher.startActivity({
+                  action: 'android.settings.APP_NOTIFICATION_SETTINGS',
+                  data: `package`,
+                });
+              },
+            },
+            {
+              text: 'Cancel',
+              style: 'cancel',
+            },
+          ],
+        );
+      }
+
+      notificationGranted =
+        notificationStatus === PermissionsAndroid.RESULTS.GRANTED;
+    } else {
+      // Notifications are automatically granted on older Android versions
+      notificationGranted = true;
+    }
+
+    return smssGranted && notificationGranted;
   } catch (err) {
     console.warn(err);
     return false;
@@ -81,6 +111,8 @@ function App(): React.JSX.Element {
       const granted = await requestSmsPermissions();
       if (granted) {
         BackgroundService.start(backgroundService, notificationOptions);
+        const isRunning = await BackgroundService.isRunning();
+        console.log('Background service running status:', isRunning);
       }
     };
 

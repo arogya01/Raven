@@ -1,6 +1,6 @@
 export const notificationOptions = {
   taskName: 'SMS Background Service',
-  taskTitle: 'SMS Background Service is running',
+  taskTitle: 'Monitoring messages',
   taskDesc: 'Listening for incoming SMS and sending to server',
   taskIcon: {
     name: 'ic_launcher',
