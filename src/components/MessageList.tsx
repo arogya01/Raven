@@ -1,12 +1,41 @@
-import {StyleSheet, View} from 'react-native';
+import {
+  FlatList,
+  FlatListProps,
+  ListRenderItem,
+  StyleSheet,
+  View,
+} from 'react-native';
 import {Colors} from '../colors';
 import {Message} from '../types';
+import React from 'react';
 
-type MessageListProps = {
-  messages: Message[];
+type MessageListProps = FlatListProps<T> & {
+  renderItem: ListRenderItem<T>;
 };
-export const MessageList = ({messages}: MessageListProps) => {
-  return <View style={styles.container}></View>;
+
+function AnimatedItem({
+  index,
+  children,
+}: {
+  index: number;
+  children: React.ReactNode;
+}) {
+  return <View index={index}>{children}</View>;
+}
+
+export const MessageList = ({renderItem, ...rest}: MessageListProps<T>) => {
+  return (
+    <View style={styles.container}>
+      <FlatList
+        {...rest}
+        renderItem={props => {
+          return (
+            <AnimatedItem index={props.index}>{renderItem(props)}</AnimatedItem>
+          );
+        }}
+      />
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({

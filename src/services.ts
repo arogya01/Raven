@@ -33,3 +33,21 @@ export const sendSmsToServer = async (message: {
     // Implement retry logic or user notification here
   }
 };
+
+export const getMessagesFromServer = async () => {
+  try {
+    const response = await fetch(`${serverUrl}/messages`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching messages:', error);
+    throw error; // Re-throw to handle in the component
+  }
+};
