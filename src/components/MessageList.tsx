@@ -9,35 +9,36 @@ import {Colors} from '../colors';
 import {Message} from '../types';
 import React from 'react';
 
-type MessageListProps = FlatListProps<T> & {
-  renderItem: ListRenderItem<T>;
+type MessageListProps = Omit<FlatListProps<Message>, 'renderItem'> & {
+  renderItem: ListRenderItem<Message>;
 };
 
-function AnimatedItem({
-  index,
-  children,
-}: {
-  index: number;
-  children: React.ReactNode;
-}) {
-  return <View index={index}>{children}</View>;
+function MessageItem({children}: {children: React.ReactNode}) {
+  return <View style={styles.messageItem}>{children}</View>;
 }
 
-export const MessageList = ({renderItem, ...rest}: MessageListProps<T>) => {
+export const MessageList = ({renderItem, ...rest}: MessageListProps) => {
   return (
     <View style={styles.container}>
       <FlatList
         {...rest}
-        renderItem={props => {
-          return (
-            <AnimatedItem index={props.index}>{renderItem(props)}</AnimatedItem>
-          );
-        }}
+        renderItem={props => <MessageItem>{renderItem(props)}</MessageItem>}
+        contentContainerStyle={styles.listContent}
       />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {flex: 1, backgroundColor: Colors.black},
+  container: {
+    flex: 1,
+    backgroundColor: Colors.black,
+  },
+  messageItem: {
+    marginVertical: 4,
+    marginHorizontal: 8,
+  },
+  listContent: {
+    paddingVertical: 12,
+  },
 });

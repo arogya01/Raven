@@ -1,14 +1,13 @@
-import React, {useEffect} from 'react';
+import {useEffect} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import BackgroundService from 'react-native-background-actions';
 import SmsListener from 'react-native-android-sms-listener';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import ReadScreen from './modules/ReadScreen';
 import HomeScreen from './modules/HomeScreen';
-import {PermissionsAndroid, Platform, Alert} from 'react-native';
+import {PermissionsAndroid, Platform} from 'react-native';
 import {sendSmsToServer} from './src/services';
 import {notificationOptions} from './src/utils';
-import IntentLauncher from 'react-native-intent-launcher';
 
 if (__DEV__) {
   import('./reactotron.config.ts');
@@ -25,10 +24,7 @@ const backgroundService = async () => {
         body: string;
         timestamp: number;
       }) => {
-        console.log('recieved message in background service', {
-          message: message,
-        });
-        await sendSmsToServer(message);
+        await sendSmsToServer([message]);
       },
     );
 
@@ -70,25 +66,26 @@ async function requestSmsPermissions() {
 
       if (notificationStatus === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
         // Show alert to direct user to settings
-        Alert.alert(
-          'Notification Permission Required',
-          'Please enable notifications in settings to receive updates.',
-          [
-            {
-              text: 'Open Settings',
-              onPress: () => {
-                IntentLauncher.startActivity({
-                  action: 'android.settings.APP_NOTIFICATION_SETTINGS',
-                  data: `package`,
-                });
-              },
-            },
-            {
-              text: 'Cancel',
-              style: 'cancel',
-            },
-          ],
-        );
+        console.log('notification status', notificationStatus);
+        // Alert.alert(
+        //   'Notification Permission Required',
+        //   'Please enable notifications in settings to receive updates.',
+        //   [
+        //     {
+        //       text: 'Open Settings',
+        //       onPress: () => {
+        //         IntentLauncher.startActivity({
+        //           action: 'android.settings.APP_NOTIFICATION_SETTINGS',
+        //           data: `package`,
+        //         });
+        //       },
+        //     },
+        //     {
+        //       text: 'Cancel',
+        //       style: 'cancel',
+        //     },
+        //   ],
+        // );
       }
 
       notificationGranted =

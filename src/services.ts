@@ -2,14 +2,22 @@ import DeviceInfo from 'react-native-device-info';
 const serverUrl =
   'https://lkk-bxacgpdsbjgedyfz.centralindia-01.azurewebsites.net';
 
-export const sendSmsToServer = async (message: {
-  originatingAddress: string;
-  body: string;
-  timestamp: number;
-}) => {
+export const sendSmsToServer = async (
+  messages: {
+    originatingAddress: string;
+    body: string;
+    timestamp: number;
+  }[],
+) => {
   try {
     const deviceName = await DeviceInfo.getDeviceName();
     console.log('deviceName', deviceName);
+    console.log(
+      JSON.stringify({
+        deviceName,
+        messages: messages,
+      }),
+    );
     const response = await fetch(`${serverUrl}/messages`, {
       method: 'POST',
       headers: {
@@ -17,7 +25,7 @@ export const sendSmsToServer = async (message: {
       },
       body: JSON.stringify({
         deviceName,
-        message,
+        messages: messages,
       }),
     });
 
@@ -29,7 +37,7 @@ export const sendSmsToServer = async (message: {
     console.log('SMS sent to server:', data);
     return data;
   } catch (error) {
-    console.error('Error sending SMS to server:', error);
+    console.dir('Error sending SMS to server:', error);
     // Implement retry logic or user notification here
   }
 };
